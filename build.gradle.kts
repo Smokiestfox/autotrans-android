@@ -11,17 +11,5 @@ plugins {
     alias(libs.plugins.detekt) apply false
 }
 
-subprojects {
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-
-    ktlint {
-        android.set(true)
-        outputToConsole.set(true)
-    }
-
-    detekt {
-        buildUponDefaultConfig = true
-        allRules = false
-    }
-}
+// Plugins are applied per-module via convention plugins in :build-logic (planned for Milestone 0 follow-up).
+// Do not apply plugins globally here — it breaks Kotlin DSL extension resolution.

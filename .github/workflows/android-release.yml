@@ -3,42 +3,53 @@ name: Android Release
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  build-and-release:
+  release:
+    name: Build & Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-      with:
-        gradle-version: '8.9'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    # Note: For a real release, signing variables (keystore, passwords) need to be configured via secrets.
-    # Currently running assembleRelease which will generate an unsigned APK or use a debug key depending on the config.
-    - name: Build Release APK
-      run: gradle assembleRelease
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-    - name: Rename APK
-      run: mv app/build/outputs/apk/release/app-release-unsigned.apk autotrans-android-${{ github.ref_name }}.apk
-      continue-on-error: true # Just in case it's named differently or signed
+      # Signing: requires KEYSTORE_FILE (base64), KEY_ALIAS, KEY_PASSWORD, STORE_PASSWORD in repo secrets
+      - name: Decode keystore
+        if: ${{ env.KEYSTORE_FILE != '' }}
+        env:
+          KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+        run: |
+          echo "$KEYSTORE_FILE" | base64 --decode > app/release.keystore
 
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          autotrans-android-${{ github.ref_name }}.apk
-          app/build/outputs/apk/release/*.apk
-        generate_release_notes: true
+      - name: Build release APK
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      - name: Sign APK (if keystore not configured in Gradle)
+        if: ${{ env.KEY_ALIAS == '' }}
+        run: echo "Warning: No signing config found. APK will be unsigned."
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "AutoTrans ${{ github.ref_name }}"
+          generate_release_notes: true
+          files: |
+            app/build/outputs/apk/release/*.apk
