@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AutoTrans</string>
+    <string name="translate_button_label">Translate Now</string>
+    <string name="start_overlay_label">Start Overlay</string>
+    <string name="stop_overlay_label">Stop Overlay</string>
+    <string name="grant_permission_label">Grant Permission</string>
+    <string name="error_translation_failed">Translation failed. Please try again.</string>
+    <string name="error_permission_denied">Permission required to display overlay.</string>
+    <string name="error_no_text">No text detected on screen.</string>
+    <string name="overlay_notification_title">AutoTrans is running</string>
+    <string name="overlay_notification_content">Translating screen content…</string>
+</resources>
