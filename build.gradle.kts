@@ -10,3 +10,18 @@ plugins {
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.detekt) apply false
 }
+
+subprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply(plugin = "io.gitlab.arturbosch.detekt")
+
+    ktlint {
+        android.set(true)
+        outputToConsole.set(true)
+    }
+
+    detekt {
+        buildUponDefaultConfig = true
+        allRules = false
+    }
+}
