@@ -26,6 +26,13 @@
             </intent-filter>
         </activity>
 
+        <!-- Foreground service for MediaProjection screen capture -->
+        <service
+            android:name="com.autotrans.android.feature.capture.service.ScreenCaptureService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
+
     </application>
 
 </manifest>
